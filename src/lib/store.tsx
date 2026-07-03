@@ -289,6 +289,7 @@ function reducer(state: State, action: Action): State {
                 status: "paid",
                 paymentMethod: action.method,
                 amountReceived: action.amountReceived,
+                paymentBatchId: action.orderId,
                 updatedAt: Date.now(),
               }
             : o
@@ -296,6 +297,7 @@ function reducer(state: State, action: Action): State {
         toasts: [...state.toasts, toastOf("success", "Bill ditutup — pembayaran berjaya")],
       };
     case "PAY_TABLE": {
+      const batchId = uid("pay");
       const tableOrders = state.orders.filter(
         (o) => o.tableId === action.tableId && o.status !== "paid" && o.status !== "cancelled"
       );
@@ -303,7 +305,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         orders: state.orders.map((o) =>
           tableOrders.some((to) => to.id === o.id)
-            ? { ...o, status: "paid", paymentMethod: action.method, amountReceived: action.amountReceived, updatedAt: Date.now() }
+            ? { ...o, status: "paid", paymentMethod: action.method, amountReceived: action.amountReceived, paymentBatchId: batchId, updatedAt: Date.now() }
             : o
         ),
         toasts: [...state.toasts, toastOf("success", "Bill ditutup — pembayaran berjaya")],

@@ -79,6 +79,7 @@ export interface Order {
   updatedAt: number;
   paymentMethod?: PaymentMethod;
   amountReceived?: number;
+  paymentBatchId?: string;
   offlineQueued?: boolean;
   offlineLate?: boolean;
   cancelledItems?: CancelledItem[];
