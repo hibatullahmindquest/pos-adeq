@@ -68,15 +68,27 @@ export default function ActiveOrdersPage() {
             <Link
               key={o.id}
               href={`/order?orderId=${o.id}`}
-              className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 flex flex-col sm:grid sm:grid-cols-4 sm:items-center gap-2 hover:border-chili transition"
+              className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 hover:border-chili transition"
             >
-              <div className="flex items-center justify-between sm:contents gap-2">
+              {/* Mobile layout */}
+              <div className="sm:hidden flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[13.5px] font-bold text-ink truncate">
+                    {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
+                  </span>
+                  <StatusBadge status={o.status} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
+                  <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
+                </div>
+              </div>
+              {/* Desktop layout */}
+              <div className="hidden sm:grid sm:grid-cols-4 sm:items-center gap-2">
                 <span className="text-[13.5px] font-bold text-ink">
                   {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
                 </span>
-                <StatusBadge status={o.status} />
-              </div>
-              <div className="flex items-center justify-between sm:contents">
+                <span><StatusBadge status={o.status} /></span>
                 <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
                 <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
               </div>

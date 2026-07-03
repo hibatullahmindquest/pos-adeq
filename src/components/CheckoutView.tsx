@@ -52,8 +52,8 @@ export default function CheckoutView() {
   const canPay = method === "qr" || receivedNum >= grandTotal;
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-y-auto">
-      <div className="flex-1 p-5 md:p-6 lg:p-8">
+    <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
+      <div className="flex-1 p-5 md:p-6 lg:p-8 overflow-y-auto">
         <div className="text-xs font-bold text-muted mb-1">Tutup Bill</div>
         <div className="text-xl font-extrabold text-ink mb-5">
           {label} · {order.type === "dine-in" ? "Dine-in" : "Tapau"}
@@ -95,7 +95,7 @@ export default function CheckoutView() {
         </div>
       </div>
 
-      <div className="w-full md:w-[360px] lg:w-[420px] bg-white border-t md:border-t-0 md:border-l border-border p-5 md:p-6 lg:p-7 flex flex-col">
+      <div className="w-full md:w-[360px] lg:w-[420px] bg-white border-t md:border-t-0 md:border-l border-border p-5 md:p-6 lg:p-7 flex flex-col overflow-y-auto">
         <div className="text-xs font-extrabold text-ink-soft uppercase tracking-wide mb-3">Kaedah bayaran</div>
         <div className="flex gap-2.5 mb-5">
           <button

@@ -103,7 +103,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 router.replace("/login");
               }}
               className="w-9 h-9 rounded-full bg-muted-bg-2 flex items-center justify-center text-ink-soft text-xs font-bold hover:bg-border"
-              title="Log keluar"
+              aria-label="Log keluar"
             >
               ⏻
             </button>

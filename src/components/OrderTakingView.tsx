@@ -38,7 +38,7 @@ export default function OrderTakingView() {
   );
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+    <div className="flex-1 flex flex-col md:flex-row min-h-0">
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <div className="flex gap-2 px-4 sm:px-6 pt-4 pb-0 overflow-x-auto">
           {state.categories.map((c) => (
@@ -53,7 +53,7 @@ export default function OrderTakingView() {
             </button>
           ))}
         </div>
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-28 lg:pb-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-20 md:pb-5">
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
             {items.map((m) => (
               <button
@@ -84,11 +84,11 @@ export default function OrderTakingView() {
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:w-[340px] border-l border-border flex-shrink-0">
+      <div className="hidden md:flex md:w-[300px] lg:w-[340px] border-l border-border flex-shrink-0">
         <CartPanel />
       </div>
 
-      <div className="lg:hidden fixed inset-x-0 bottom-0 z-40">
+      <div className="md:hidden fixed inset-x-0 bottom-0 z-40">
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
@@ -100,7 +100,7 @@ export default function OrderTakingView() {
       </div>
 
       {sheetOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-ink/45 flex items-end" onClick={() => setSheetOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-50 bg-ink/45 flex items-end" onClick={() => setSheetOpen(false)}>
           <div
             className="w-full bg-white rounded-t-3xl max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}

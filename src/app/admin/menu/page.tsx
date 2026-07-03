@@ -161,15 +161,16 @@ export default function AdminMenuPage() {
                   <span className="text-[13px] font-bold text-ink tab-nums">{formatRM(item.price)}</span>
                   <button
                     onClick={() => dispatch({ type: "TOGGLE_AVAILABILITY", id: item.id })}
-                    className={`text-[11px] font-extrabold px-2.5 py-1 rounded-md ${
+                    className={`text-[11px] font-extrabold px-2.5 py-1.5 rounded-md ${
                       item.available ? "bg-status-ready-bg text-status-ready-text" : "bg-muted-bg-2 text-muted"
                     }`}
                   >
                     {item.available ? "Ada" : "Habis"}
                   </button>
-                  <span className="text-xs font-bold text-chili flex gap-1.5">
-                    <button onClick={() => openEdit(item)}>Edit</button>·
-                    <button onClick={() => setDeleting(item)}>Padam</button>
+                  <span className="text-xs font-bold text-chili flex gap-0.5">
+                    <button onClick={() => openEdit(item)} className="px-2 py-2">Edit</button>
+                    <span className="text-muted self-center">·</span>
+                    <button onClick={() => setDeleting(item)} className="px-2 py-2">Padam</button>
                   </span>
                 </div>
               </div>
