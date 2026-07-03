@@ -56,8 +56,16 @@ export interface OrderItem {
 }
 
 export type OrderType = "dine-in" | "tapau";
-export type OrderStatus = "new" | "cooking" | "ready" | "served" | "paid";
+export type OrderStatus = "new" | "cooking" | "ready" | "served" | "paid" | "cancelled";
 export type PaymentMethod = "cash" | "qr";
+
+export interface CancelledItem {
+  name: string;
+  quantity: number;
+  basePrice: number;
+  modifiers: SelectedModifier[];
+  cancelledAt: number;
+}
 
 export interface Order {
   id: string;
@@ -73,6 +81,7 @@ export interface Order {
   amountReceived?: number;
   offlineQueued?: boolean;
   offlineLate?: boolean;
+  cancelledItems?: CancelledItem[];
 }
 
 export interface TableEntity {
