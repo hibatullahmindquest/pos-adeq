@@ -125,7 +125,7 @@ export default function KitchenPage() {
 
   return (
     <AppShell>
-      <div className="flex-1 bg-kds-bg overflow-y-auto p-6 lg:p-7">
+      <div className="flex-1 bg-kds-bg overflow-y-auto p-4 sm:p-6 lg:p-7">
         <div className="flex justify-between items-center mb-5">
           <div className="text-lg font-extrabold text-kds-text">Kitchen · {active.length} order aktif</div>
           <div className="flex items-center gap-2">

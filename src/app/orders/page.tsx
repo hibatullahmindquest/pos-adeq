@@ -20,7 +20,7 @@ export default function ActiveOrdersPage() {
 
   return (
     <AppShell>
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-6xl w-full mx-auto">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="text-lg font-extrabold text-ink">Meja</div>
           <div className="flex gap-3.5 text-xs text-muted flex-wrap">
@@ -68,17 +68,18 @@ export default function ActiveOrdersPage() {
             <Link
               key={o.id}
               href={`/order?orderId=${o.id}`}
-              className="bg-white border border-border rounded-xl px-4.5 py-3.5 grid grid-cols-2 sm:grid-cols-4 items-center gap-2 hover:border-chili transition"
-              style={{ paddingLeft: 18, paddingRight: 18 }}
+              className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 flex flex-col sm:grid sm:grid-cols-4 sm:items-center gap-2 hover:border-chili transition"
             >
-              <span className="text-[13.5px] font-bold text-ink">
-                {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
-              </span>
-              <span className="justify-self-start">
+              <div className="flex items-center justify-between sm:contents gap-2">
+                <span className="text-[13.5px] font-bold text-ink">
+                  {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
+                </span>
                 <StatusBadge status={o.status} />
-              </span>
-              <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
-              <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
+              </div>
+              <div className="flex items-center justify-between sm:contents">
+                <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
+                <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
+              </div>
             </Link>
           ))}
         </div>

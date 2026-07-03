@@ -43,7 +43,7 @@ export default function AdminSettingsPage() {
 
   return (
     <AppShell>
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-6xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="bg-white border border-border rounded-2xl p-5.5" style={{ padding: 22 }}>
           <div className="text-sm font-extrabold text-ink mb-4">Maklumat Restoran</div>
           <div className="flex items-center gap-3.5 mb-3.5">

@@ -40,7 +40,7 @@ export default function OrderTakingView() {
   return (
     <div className="flex-1 flex flex-col lg:flex-row min-h-0">
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        <div className="flex gap-2 px-6 pt-4 pb-0 overflow-x-auto">
+        <div className="flex gap-2 px-4 sm:px-6 pt-4 pb-0 overflow-x-auto">
           {state.categories.map((c) => (
             <button
               key={c.id}
@@ -53,7 +53,7 @@ export default function OrderTakingView() {
             </button>
           ))}
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-5 pb-28 lg:pb-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-28 lg:pb-5">
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
             {items.map((m) => (
               <button
