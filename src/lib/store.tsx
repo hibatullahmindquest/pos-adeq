@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useReducer } from "react";
 import {
+  CancelledItem,
   Category,
   MenuItem,
   ModifierGroup,
@@ -103,6 +104,9 @@ type Action =
   | { type: "SEND_ORDER" }
   | { type: "SET_ORDER_STATUS"; orderId: string; status: OrderStatus }
   | { type: "PAY_ORDER"; orderId: string; method: PaymentMethod; amountReceived?: number }
+  | { type: "PAY_TABLE"; tableId: string; method: PaymentMethod; amountReceived?: number }
+  | { type: "CANCEL_ORDER_ITEM"; orderId: string; itemId: string }
+  | { type: "CANCEL_ORDER"; orderId: string }
   | { type: "DISMISS_TOAST"; id: string }
   | { type: "ADD_TOAST"; toast: Toast }
   | { type: "ADD_MENU_ITEM"; item: MenuItem }
@@ -151,28 +155,11 @@ function reducer(state: State, action: Action): State {
       }
       return { ...state, isOnline: action.online };
     }
-    case "START_CART_FOR_TABLE": {
-      const existing = state.orders.find(
-        (o) => o.tableId === action.tableId && o.status !== "paid"
-      );
-      if (existing) {
-        return {
-          ...state,
-          cart: {
-            orderId: existing.id,
-            type: "dine-in",
-            tableId: action.tableId,
-            customerName: "",
-            customerPhone: "",
-            items: [],
-          },
-        };
-      }
+    case "START_CART_FOR_TABLE":
       return {
         ...state,
         cart: { type: "dine-in", tableId: action.tableId, customerName: "", customerPhone: "", items: [] },
       };
-    }
     case "START_CART_TAPAU":
       return { ...state, cart: { type: "tapau", customerName: "", customerPhone: "", items: [] } };
     case "LOAD_CART_FROM_ORDER": {
@@ -308,6 +295,62 @@ function reducer(state: State, action: Action): State {
         ),
         toasts: [...state.toasts, toastOf("success", "Bill ditutup — pembayaran berjaya")],
       };
+    case "PAY_TABLE": {
+      const tableOrders = state.orders.filter(
+        (o) => o.tableId === action.tableId && o.status !== "paid" && o.status !== "cancelled"
+      );
+      return {
+        ...state,
+        orders: state.orders.map((o) =>
+          tableOrders.some((to) => to.id === o.id)
+            ? { ...o, status: "paid", paymentMethod: action.method, amountReceived: action.amountReceived, updatedAt: Date.now() }
+            : o
+        ),
+        toasts: [...state.toasts, toastOf("success", "Bill ditutup — pembayaran berjaya")],
+      };
+    }
+    case "CANCEL_ORDER_ITEM": {
+      const order = state.orders.find((o) => o.id === action.orderId);
+      if (!order) return state;
+      const item = order.items.find((i) => i.id === action.itemId);
+      if (!item) return state;
+      const cancelled: CancelledItem = {
+        name: item.name,
+        quantity: item.quantity,
+        basePrice: item.basePrice,
+        modifiers: item.modifiers,
+        cancelledAt: Date.now(),
+      };
+      return {
+        ...state,
+        orders: state.orders.map((o) =>
+          o.id === action.orderId
+            ? { ...o, items: o.items.filter((i) => i.id !== action.itemId), cancelledItems: [...(o.cancelledItems ?? []), cancelled], updatedAt: Date.now() }
+            : o
+        ),
+        toasts: [...state.toasts, toastOf("info", `${item.name} dibatalkan`)],
+      };
+    }
+    case "CANCEL_ORDER": {
+      const order = state.orders.find((o) => o.id === action.orderId);
+      if (!order) return state;
+      const cancelled: CancelledItem[] = order.items.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        basePrice: item.basePrice,
+        modifiers: item.modifiers,
+        cancelledAt: Date.now(),
+      }));
+      return {
+        ...state,
+        orders: state.orders.map((o) =>
+          o.id === action.orderId
+            ? { ...o, status: "cancelled", items: [], cancelledItems: [...(o.cancelledItems ?? []), ...cancelled], updatedAt: Date.now() }
+            : o
+        ),
+        toasts: [...state.toasts, toastOf("info", "Order dibatalkan")],
+      };
+    }
     case "ADD_TOAST":
       return { ...state, toasts: [...state.toasts, action.toast] };
     case "DISMISS_TOAST":
@@ -422,4 +465,4 @@ export function buildOrderItem(
 }
 
 export { orderTotal };
-export type { Order, OrderItem, OrderStatus, OrderType, ModifierOption };
+export type { CancelledItem, Order, OrderItem, OrderStatus, OrderType, ModifierOption };

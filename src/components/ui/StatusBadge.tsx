@@ -6,6 +6,7 @@ const config: Record<OrderStatus, { label: string; bg: string; text: string; dot
   ready: { label: "READY", bg: "bg-status-ready-bg", text: "text-status-ready-text", dot: "bg-status-ready" },
   served: { label: "SERVED", bg: "bg-[#E1EBFA]", text: "text-status-served", dot: "bg-status-served" },
   paid: { label: "PAID", bg: "bg-status-ready-bg", text: "text-status-ready-text", dot: "bg-status-ready" },
+  cancelled: { label: "BATAL", bg: "bg-muted-bg-2", text: "text-muted", dot: "bg-faint" },
 };
 
 export default function StatusBadge({ status, dotOnly }: { status: OrderStatus; dotOnly?: boolean }) {
@@ -19,25 +20,25 @@ export default function StatusBadge({ status, dotOnly }: { status: OrderStatus; 
 }
 
 export function statusSolidBg(status: OrderStatus): string {
-  return (
-    {
-      new: "bg-status-new",
-      cooking: "bg-status-cooking",
-      ready: "bg-status-ready",
-      served: "bg-status-served",
-      paid: "bg-status-ready",
-    } as Record<OrderStatus, string>
-  )[status];
+  const map: Record<OrderStatus, string> = {
+    new: "bg-status-new",
+    cooking: "bg-status-cooking",
+    ready: "bg-status-ready",
+    served: "bg-status-served",
+    paid: "bg-status-ready",
+    cancelled: "bg-faint",
+  };
+  return map[status];
 }
 
 export function statusBorderColor(status: OrderStatus): string {
-  return (
-    {
-      new: "border-border",
-      cooking: "border-status-cooking",
-      ready: "border-status-ready",
-      served: "border-status-served",
-      paid: "border-status-ready",
-    } as Record<OrderStatus, string>
-  )[status];
+  const map: Record<OrderStatus, string> = {
+    new: "border-border",
+    cooking: "border-status-cooking",
+    ready: "border-status-ready",
+    served: "border-status-served",
+    paid: "border-status-ready",
+    cancelled: "border-border",
+  };
+  return map[status];
 }

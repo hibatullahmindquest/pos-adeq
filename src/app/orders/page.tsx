@@ -1,22 +1,42 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
+import TableDetailModal from "@/components/TableDetailModal";
 import { useStore } from "@/lib/store";
-import { orderTotal } from "@/lib/types";
+import { Order, OrderStatus, orderTotal } from "@/lib/types";
 import { elapsedLabel, formatRM } from "@/lib/utils";
 import StatusBadge, { statusBorderColor } from "@/components/ui/StatusBadge";
 import EmptyState from "@/components/ui/EmptyState";
 
+const STATUS_PRIORITY: OrderStatus[] = ["new", "cooking", "ready", "served"];
+
+function aggregateStatus(orders: Order[]): OrderStatus | null {
+  if (orders.length === 0) return null;
+  for (const s of STATUS_PRIORITY) {
+    if (orders.some((o) => o.status === s)) return s;
+  }
+  return null;
+}
+
 export default function ActiveOrdersPage() {
   const { state } = useStore();
-  const openOrders = state.orders.filter((o) => o.status !== "paid");
+  const router = useRouter();
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
 
-  const dineIn = state.tables.map((t) => ({
-    table: t,
-    order: openOrders.find((o) => o.tableId === t.id),
-  }));
+  const openOrders = state.orders.filter((o) => o.status !== "paid" && o.status !== "cancelled");
+
+  const dineIn = state.tables.map((t) => {
+    const tableOrders = openOrders.filter((o) => o.tableId === t.id);
+    return { table: t, orders: tableOrders, status: aggregateStatus(tableOrders) };
+  });
+
   const tapau = openOrders.filter((o) => o.type === "tapau");
+
+  const selectedTable = selectedTableId
+    ? state.tables.find((t) => t.id === selectedTableId)
+    : null;
 
   return (
     <AppShell>
@@ -32,23 +52,32 @@ export default function ActiveOrdersPage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3.5 mb-8">
-          {dineIn.map(({ table, order }) => (
-            <Link
+          {dineIn.map(({ table, orders, status }) => (
+            <button
               key={table.id}
-              href={order ? `/order?orderId=${order.id}` : `/order?table=${table.id}`}
-              className={`bg-white border-2 rounded-2xl p-4 min-h-28 flex flex-col justify-between hover:shadow-sm transition ${
-                order ? statusBorderColor(order.status) : "border-border"
+              type="button"
+              onClick={() =>
+                orders.length > 0
+                  ? setSelectedTableId(table.id)
+                  : router.push(`/order?table=${table.id}`)
+              }
+              className={`text-left bg-white border-2 rounded-2xl p-4 min-h-28 flex flex-col justify-between hover:shadow-sm transition ${
+                status ? statusBorderColor(status) : "border-border"
               }`}
             >
-              {order ? (
+              {status ? (
                 <>
                   <div className="flex justify-between items-start">
                     <span className="text-sm font-extrabold text-ink">{table.name}</span>
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={status} />
                   </div>
                   <div>
-                    <div className="text-[15px] font-extrabold text-ink tab-nums mt-3">{formatRM(orderTotal(order))}</div>
-                    <div className="text-[11px] text-muted mt-0.5">{elapsedLabel(order.createdAt)}</div>
+                    <div className="text-[13px] text-muted mt-2">
+                      {orders.length} order
+                    </div>
+                    <div className="text-[15px] font-extrabold text-ink tab-nums mt-0.5">
+                      {formatRM(orders.reduce((s, o) => s + orderTotal(o), 0))}
+                    </div>
                   </div>
                 </>
               ) : (
@@ -57,7 +86,7 @@ export default function ActiveOrdersPage() {
                   <div className="text-[11px] text-faint">Kosong</div>
                 </>
               )}
-            </Link>
+            </button>
           ))}
         </div>
 
@@ -65,10 +94,11 @@ export default function ActiveOrdersPage() {
         <div className="flex flex-col gap-2">
           {tapau.length === 0 && <EmptyState message="Tiada order tapau aktif" />}
           {tapau.map((o) => (
-            <Link
+            <button
               key={o.id}
-              href={`/order?orderId=${o.id}`}
-              className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 hover:border-chili transition"
+              type="button"
+              onClick={() => router.push(`/order?orderId=${o.id}`)}
+              className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 hover:border-chili transition w-full text-left"
             >
               {/* Mobile layout */}
               <div className="sm:hidden flex flex-col gap-1.5">
@@ -92,10 +122,18 @@ export default function ActiveOrdersPage() {
                 <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
                 <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
               </div>
-            </Link>
+            </button>
           ))}
         </div>
       </div>
+
+      {selectedTableId && selectedTable && (
+        <TableDetailModal
+          tableId={selectedTableId}
+          tableName={selectedTable.name}
+          onClose={() => setSelectedTableId(null)}
+        />
+      )}
     </AppShell>
   );
 }
