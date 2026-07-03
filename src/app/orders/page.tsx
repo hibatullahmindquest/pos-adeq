@@ -1,0 +1,97 @@
+"use client";
+
+import Link from "next/link";
+import AppShell from "@/components/AppShell";
+import { useStore } from "@/lib/store";
+import { orderTotal } from "@/lib/types";
+import { elapsedLabel, formatRM } from "@/lib/utils";
+import StatusBadge, { statusBorderColor } from "@/components/ui/StatusBadge";
+import EmptyState from "@/components/ui/EmptyState";
+
+export default function ActiveOrdersPage() {
+  const { state } = useStore();
+  const openOrders = state.orders.filter((o) => o.status !== "paid");
+
+  const dineIn = state.tables.map((t) => ({
+    table: t,
+    order: openOrders.find((o) => o.tableId === t.id),
+  }));
+  const tapau = openOrders.filter((o) => o.type === "tapau");
+
+  return (
+    <AppShell>
+      <div className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-6xl w-full mx-auto">
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="text-lg font-extrabold text-ink">Meja</div>
+          <div className="flex gap-3.5 text-xs text-muted flex-wrap">
+            <Legend color="bg-status-new" label="New" />
+            <Legend color="bg-status-cooking" label="Cooking" />
+            <Legend color="bg-status-ready" label="Ready" />
+            <Legend color="bg-status-served" label="Served" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3.5 mb-8">
+          {dineIn.map(({ table, order }) => (
+            <Link
+              key={table.id}
+              href={order ? `/order?orderId=${order.id}` : `/order?table=${table.id}`}
+              className={`bg-white border-2 rounded-2xl p-4 min-h-28 flex flex-col justify-between hover:shadow-sm transition ${
+                order ? statusBorderColor(order.status) : "border-border"
+              }`}
+            >
+              {order ? (
+                <>
+                  <div className="flex justify-between items-start">
+                    <span className="text-sm font-extrabold text-ink">{table.name}</span>
+                    <StatusBadge status={order.status} />
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-extrabold text-ink tab-nums mt-3">{formatRM(orderTotal(order))}</div>
+                    <div className="text-[11px] text-muted mt-0.5">{elapsedLabel(order.createdAt)}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-sm font-extrabold text-ink mb-2">{table.name}</div>
+                  <div className="text-[11px] text-faint">Kosong</div>
+                </>
+              )}
+            </Link>
+          ))}
+        </div>
+
+        <div className="text-base font-extrabold text-ink mb-3">Tapau</div>
+        <div className="flex flex-col gap-2">
+          {tapau.length === 0 && <EmptyState message="Tiada order tapau aktif" />}
+          {tapau.map((o) => (
+            <Link
+              key={o.id}
+              href={`/order?orderId=${o.id}`}
+              className="bg-white border border-border rounded-xl px-4.5 py-3.5 grid grid-cols-2 sm:grid-cols-4 items-center gap-2 hover:border-chili transition"
+              style={{ paddingLeft: 18, paddingRight: 18 }}
+            >
+              <span className="text-[13.5px] font-bold text-ink">
+                {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
+              </span>
+              <span className="justify-self-start">
+                <StatusBadge status={o.status} />
+              </span>
+              <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
+              <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className={`w-2.5 h-2.5 rounded-full inline-block ${color}`} />
+      {label}
+    </span>
+  );
+}
