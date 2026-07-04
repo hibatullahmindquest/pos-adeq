@@ -180,7 +180,7 @@ function reducer(state: State, action: Action): State {
     case "SET_CART_TYPE":
       return {
         ...state,
-        cart: { ...state.cart, type: action.cartType, orderId: undefined, tableId: undefined },
+        cart: { ...state.cart, type: action.cartType, orderId: undefined },
       };
     case "SET_CART_TABLE":
       return { ...state, cart: { ...state.cart, tableId: action.tableId } };
@@ -223,7 +223,7 @@ function reducer(state: State, action: Action): State {
         const newOrder: Order = {
           id: cart.orderId ?? uid("order"),
           type: cart.type,
-          tableId: cart.type === "dine-in" ? cart.tableId : undefined,
+          tableId: cart.tableId,
           customerName: cart.type === "tapau" ? cart.customerName : undefined,
           customerPhone: cart.type === "tapau" ? cart.customerPhone : undefined,
           items: cart.items,
@@ -257,7 +257,7 @@ function reducer(state: State, action: Action): State {
       const newOrder: Order = {
         id: uid("order"),
         type: cart.type,
-        tableId: cart.type === "dine-in" ? cart.tableId : undefined,
+        tableId: cart.tableId,
         customerName: cart.type === "tapau" ? cart.customerName : undefined,
         customerPhone: cart.type === "tapau" ? cart.customerPhone : undefined,
         items: cart.items,

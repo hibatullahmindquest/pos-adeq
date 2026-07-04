@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import TableDetailModal from "@/components/TableDetailModal";
+import TapauDetailModal from "@/components/TapauDetailModal";
 import { useStore } from "@/lib/store";
 import { Order, OrderStatus, orderTotal } from "@/lib/types";
 import { elapsedLabel, formatRM } from "@/lib/utils";
@@ -24,6 +25,7 @@ export default function ActiveOrdersPage() {
   const { state } = useStore();
   const router = useRouter();
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [selectedTapauId, setSelectedTapauId] = useState<string | null>(null);
 
   const openOrders = state.orders.filter((o) => o.status !== "paid" && o.status !== "cancelled");
 
@@ -32,7 +34,8 @@ export default function ActiveOrdersPage() {
     return { table: t, orders: tableOrders, status: aggregateStatus(tableOrders) };
   });
 
-  const tapau = openOrders.filter((o) => o.type === "tapau");
+  // Tapau orders linked to a table appear inside TableDetailModal — exclude them here
+  const tapau = openOrders.filter((o) => o.type === "tapau" && !o.tableId);
 
   const selectedTable = selectedTableId
     ? state.tables.find((t) => t.id === selectedTableId)
@@ -97,7 +100,7 @@ export default function ActiveOrdersPage() {
             <button
               key={o.id}
               type="button"
-              onClick={() => router.push(`/order?orderId=${o.id}`)}
+              onClick={() => setSelectedTapauId(o.id)}
               className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 hover:border-chili transition w-full text-left"
             >
               {/* Mobile layout */}
@@ -132,6 +135,12 @@ export default function ActiveOrdersPage() {
           tableId={selectedTableId}
           tableName={selectedTable.name}
           onClose={() => setSelectedTableId(null)}
+        />
+      )}
+      {selectedTapauId && (
+        <TapauDetailModal
+          orderId={selectedTapauId}
+          onClose={() => setSelectedTapauId(null)}
         />
       )}
     </AppShell>

@@ -90,6 +90,11 @@ export default function CartPanel({ onSent }: { onSent?: () => void }) {
               placeholder="No. telefon"
               className="border border-border rounded-lg px-3 py-2 text-[13px] font-semibold text-ink placeholder:text-faint placeholder:font-medium"
             />
+            {cart.tableId && (
+              <div className="text-[11.5px] font-semibold text-muted bg-cream rounded-lg px-3 py-1.5">
+                Tapau ini akan dicantum dengan {state.tables.find((t) => t.id === cart.tableId)?.name ?? "meja"}
+              </div>
+            )}
           </div>
         )}
       </div>
