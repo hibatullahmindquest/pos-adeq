@@ -104,7 +104,7 @@ export default function AdminMenuPage() {
           >
             Semua
           </button>
-          {state.categories.map((c) => (
+          {[...state.categories].sort((a, b) => a.order - b.order).map((c) => (
             <button
               key={c.id}
               onClick={() => setCategoryFilter(c.id)}
