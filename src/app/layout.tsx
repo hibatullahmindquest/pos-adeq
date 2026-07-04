@@ -11,7 +11,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Warung Sedap — POS",
+  title: "Restoran Adeq Tomyam — POS",
   description: "Internal restaurant POS — order taking, kitchen display, checkout",
   manifest: "/manifest.json",
 };

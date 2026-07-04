@@ -95,7 +95,7 @@ export const seedStaff: StaffUser[] = [
 ];
 
 export const seedSettings: Settings = {
-  restaurantName: "Warung Sedap",
+  restaurantName: "Restoran Adeq Tomyam",
   address: "12 Jalan Sedap, Petaling Jaya",
   taxServiceEnabled: true,
   taxServicePercent: 10,
