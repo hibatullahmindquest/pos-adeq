@@ -82,13 +82,17 @@ export default function CartPanel({ onSent }: { onSent?: () => void }) {
               )}
               <div className="flex items-center justify-between mt-2">
                 <QuantityStepper qty={it.quantity} onChange={(q) => dispatch({ type: "UPDATE_CART_ITEM_QTY", itemId: it.id, qty: q })} />
-                {!isOnline && (
-                  <span className="flex items-center gap-1.5 text-[11px] font-bold text-status-cooking-dark">
-                    <span className="w-1.5 h-1.5 rounded-full bg-status-cooking-dark inline-block" />
-                    Belum sync
-                  </span>
-                )}
-                {isOnline && <span className="text-[11px] text-faint">Nota: {it.note ?? "—"}</span>}
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: "TOGGLE_CART_ITEM_TAPAU", itemId: it.id })}
+                  className={`text-[10.5px] font-extrabold px-2 py-0.5 rounded-full border transition ${
+                    it.tapau
+                      ? "bg-status-cooking-bg border-status-cooking text-status-cooking-dark"
+                      : "bg-cream border-border text-muted"
+                  }`}
+                >
+                  Tapau
+                </button>
               </div>
             </div>
           ))

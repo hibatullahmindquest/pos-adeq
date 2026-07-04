@@ -99,6 +99,7 @@ type Action =
   | { type: "SET_CART_CUSTOMER"; name: string; phone: string }
   | { type: "ADD_CART_ITEM"; item: OrderItem }
   | { type: "UPDATE_CART_ITEM_QTY"; itemId: string; qty: number }
+  | { type: "TOGGLE_CART_ITEM_TAPAU"; itemId: string }
   | { type: "REMOVE_CART_ITEM"; itemId: string }
   | { type: "CLEAR_CART" }
   | { type: "SEND_ORDER" }
@@ -107,7 +108,6 @@ type Action =
   | { type: "PAY_TABLE"; tableId: string; method: PaymentMethod; amountReceived?: number }
   | { type: "CANCEL_ORDER_ITEM"; orderId: string; itemId: string }
   | { type: "CANCEL_ORDER"; orderId: string }
-  | { type: "SET_ORDER_TYPE"; orderId: string; orderType: OrderType }
   | { type: "DISMISS_TOAST"; id: string }
   | { type: "ADD_TOAST"; toast: Toast }
   | { type: "ADD_MENU_ITEM"; item: MenuItem }
@@ -199,6 +199,16 @@ function reducer(state: State, action: Action): State {
             .filter((it) => it.quantity > 0),
         },
       };
+    case "TOGGLE_CART_ITEM_TAPAU":
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          items: state.cart.items.map((it) =>
+            it.id === action.itemId ? { ...it, tapau: !it.tapau } : it
+          ),
+        },
+      };
     case "REMOVE_CART_ITEM":
       return { ...state, cart: { ...state.cart, items: state.cart.items.filter((it) => it.id !== action.itemId) } };
     case "CLEAR_CART":
@@ -207,68 +217,36 @@ function reducer(state: State, action: Action): State {
       const cart = state.cart;
       if (cart.items.length === 0) return state;
 
-      if (!state.isOnline) {
-        const queuedExisting = state.pendingOrders.find((o) => o.id === cart.orderId);
-        if (queuedExisting) {
-          const updated: Order = {
-            ...queuedExisting,
-            items: [...queuedExisting.items, ...cart.items],
-            updatedAt: Date.now(),
-          };
-          return {
-            ...state,
-            pendingOrders: state.pendingOrders.map((o) => (o.id === updated.id ? updated : o)),
-            cart: emptyCart,
-          };
-        }
-        const newOrder: Order = {
-          id: cart.orderId ?? uid("order"),
-          type: cart.type,
-          tableId: cart.tableId,
-          customerName: cart.type === "tapau" ? cart.customerName : undefined,
-          customerPhone: cart.type === "tapau" ? cart.customerPhone : undefined,
-          items: cart.items,
-          status: "new",
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          offlineQueued: true,
-        };
-        return { ...state, pendingOrders: [...state.pendingOrders, newOrder], cart: emptyCart };
-      }
+      const dineInItems = cart.items.filter((it) => !it.tapau);
+      const tapauItems = cart.items.filter((it) => it.tapau);
+      const now = Date.now();
 
-      const existingIdx = state.orders.findIndex((o) => o.id === cart.orderId);
-      if (existingIdx >= 0) {
-        const existing = state.orders[existingIdx];
-        const merged: Order = {
-          ...existing,
-          items: [...existing.items, ...cart.items],
-          status: existing.status === "ready" || existing.status === "served" ? "new" : existing.status,
-          updatedAt: Date.now(),
-        };
-        const orders = [...state.orders];
-        orders[existingIdx] = merged;
+      function makeOrder(type: OrderType, items: OrderItem[]): Order {
         return {
-          ...state,
-          orders,
-          cart: emptyCart,
-          toasts: [...state.toasts, toastOf("success", "Order dihantar ke Kitchen")],
+          id: uid("order"),
+          type,
+          tableId: cart.tableId,
+          items,
+          status: "new",
+          createdAt: now,
+          updatedAt: now,
         };
       }
 
-      const newOrder: Order = {
-        id: uid("order"),
-        type: cart.type,
-        tableId: cart.tableId,
-        customerName: cart.type === "tapau" ? cart.customerName : undefined,
-        customerPhone: cart.type === "tapau" ? cart.customerPhone : undefined,
-        items: cart.items,
-        status: "new",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
+      if (!state.isOnline) {
+        const queued: Order[] = [];
+        if (dineInItems.length > 0) queued.push({ ...makeOrder("dine-in", dineInItems), offlineQueued: true });
+        if (tapauItems.length > 0) queued.push({ ...makeOrder("tapau", tapauItems), offlineQueued: true });
+        return { ...state, pendingOrders: [...state.pendingOrders, ...queued], cart: emptyCart };
+      }
+
+      const newOrders: Order[] = [];
+      if (dineInItems.length > 0) newOrders.push(makeOrder("dine-in", dineInItems));
+      if (tapauItems.length > 0) newOrders.push(makeOrder("tapau", tapauItems));
+
       return {
         ...state,
-        orders: [...state.orders, newOrder],
+        orders: [...state.orders, ...newOrders],
         cart: emptyCart,
         toasts: [...state.toasts, toastOf("success", "Order dihantar ke Kitchen")],
       };
@@ -354,13 +332,6 @@ function reducer(state: State, action: Action): State {
         toasts: [...state.toasts, toastOf("info", "Order dibatalkan")],
       };
     }
-    case "SET_ORDER_TYPE":
-      return {
-        ...state,
-        orders: state.orders.map((o) =>
-          o.id === action.orderId ? { ...o, type: action.orderType, updatedAt: Date.now() } : o
-        ),
-      };
     case "ADD_TOAST":
       return { ...state, toasts: [...state.toasts, action.toast] };
     case "DISMISS_TOAST":

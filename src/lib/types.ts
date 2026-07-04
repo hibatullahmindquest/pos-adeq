@@ -53,6 +53,7 @@ export interface OrderItem {
   modifiers: SelectedModifier[];
   quantity: number;
   note?: string;
+  tapau?: boolean;
 }
 
 export type OrderType = "dine-in" | "tapau";
