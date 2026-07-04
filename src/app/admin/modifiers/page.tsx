@@ -5,12 +5,15 @@ import AppShell from "@/components/AppShell";
 import { useStore } from "@/lib/store";
 import { ModifierGroup } from "@/lib/types";
 import { uid } from "@/lib/utils";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function AdminModifiersPage() {
   const { state, dispatch } = useStore();
   const [selectedId, setSelectedId] = useState<string>(state.modifierGroups[0]?.id ?? "");
   // Raw string per option while typing — avoids losing decimal mid-entry
   const [priceInputs, setPriceInputs] = useState<Record<string, string>>({});
+  const [confirmDeleteGroup, setConfirmDeleteGroup] = useState(false);
+  const [confirmDeleteOptId, setConfirmDeleteOptId] = useState<string | null>(null);
   const selected = state.modifierGroups.find((g) => g.id === selectedId);
 
   function addGroup() {
@@ -108,7 +111,7 @@ export default function AdminModifiersPage() {
                 {selected.selectionType === "single" ? "Pelanggan pilih satu sahaja" : "Boleh pilih lebih dari satu"}
               </span>
               <button
-                onClick={() => dispatch({ type: "DELETE_MODIFIER_GROUP", id: selected.id })}
+                onClick={() => setConfirmDeleteGroup(true)}
                 className="ml-auto text-xs font-bold text-status-late"
               >
                 Padam Kumpulan
@@ -154,7 +157,7 @@ export default function AdminModifiersPage() {
                     className="text-[12.5px] text-ink-soft tab-nums bg-transparent w-16"
                   />
                   <button
-                    onClick={() => updateGroup({ ...selected, options: selected.options.filter((o) => o.id !== opt.id) })}
+                    onClick={() => setConfirmDeleteOptId(opt.id)}
                     className="text-xs font-bold text-muted justify-self-end"
                   >
                     Padam
@@ -191,6 +194,34 @@ export default function AdminModifiersPage() {
           <div className="flex-1 flex items-center justify-center text-muted text-sm">Pilih atau cipta kumpulan modifier</div>
         )}
       </div>
+
+      {confirmDeleteGroup && selected && (
+        <ConfirmDialog
+          title="Padam Kumpulan?"
+          message={`"${selected.name}" akan dipadam dan tidak boleh dipulihkan.`}
+          confirmLabel="Padam"
+          onConfirm={() => {
+            dispatch({ type: "DELETE_MODIFIER_GROUP", id: selected.id });
+            const remaining = state.modifierGroups.filter((g) => g.id !== selected.id);
+            setSelectedId(remaining[0]?.id ?? "");
+            setConfirmDeleteGroup(false);
+          }}
+          onCancel={() => setConfirmDeleteGroup(false)}
+        />
+      )}
+
+      {confirmDeleteOptId && selected && (
+        <ConfirmDialog
+          title="Padam Pilihan?"
+          message={`Pilihan ini akan dipadam dari kumpulan "${selected.name}".`}
+          confirmLabel="Padam"
+          onConfirm={() => {
+            updateGroup({ ...selected, options: selected.options.filter((o) => o.id !== confirmDeleteOptId) });
+            setConfirmDeleteOptId(null);
+          }}
+          onCancel={() => setConfirmDeleteOptId(null)}
+        />
+      )}
     </AppShell>
   );
 }

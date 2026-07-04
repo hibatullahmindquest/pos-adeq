@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { lineTotal, Order } from "@/lib/types";
 import { formatRM } from "@/lib/utils";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Button from "@/components/ui/Button";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface Props {
   tableId: string;
@@ -16,6 +18,8 @@ interface Props {
 export default function TableDetailModal({ tableId, tableName, onClose }: Props) {
   const { state, dispatch } = useStore();
   const router = useRouter();
+  const [confirmCancelOrderId, setConfirmCancelOrderId] = useState<string | null>(null);
+  const [confirmCancelItem, setConfirmCancelItem] = useState<{ orderId: string; itemId: string; name: string } | null>(null);
 
   const activeOrders: Order[] = state.orders
     .filter((o) => o.tableId === tableId && o.status !== "paid" && o.status !== "cancelled")
@@ -81,7 +85,7 @@ export default function TableDetailModal({ tableId, tableName, onClose }: Props)
                     <StatusBadge status={order.status} />
                   </div>
                   <button
-                    onClick={() => dispatch({ type: "CANCEL_ORDER", orderId: order.id })}
+                    onClick={() => setConfirmCancelOrderId(order.id)}
                     className="text-[11.5px] font-bold text-status-late hover:underline px-1 py-1"
                   >
                     Batal
@@ -109,7 +113,7 @@ export default function TableDetailModal({ tableId, tableName, onClose }: Props)
                           {formatRM(lineTotal(item))}
                         </span>
                         <button
-                          onClick={() => dispatch({ type: "CANCEL_ORDER_ITEM", orderId: order.id, itemId: item.id })}
+                          onClick={() => setConfirmCancelItem({ orderId: order.id, itemId: item.id, name: item.name })}
                           aria-label={`Batal ${item.name}`}
                           className="w-7 h-7 rounded-full bg-status-late-bg text-status-late text-[11px] font-extrabold flex items-center justify-center flex-shrink-0"
                         >
@@ -141,6 +145,32 @@ export default function TableDetailModal({ tableId, tableName, onClose }: Props)
           </div>
         </div>
       </div>
+
+      {confirmCancelOrderId && (
+        <ConfirmDialog
+          title="Batal Order?"
+          message="Semua item dalam order ini akan dibatalkan."
+          confirmLabel="Batal Order"
+          onConfirm={() => {
+            dispatch({ type: "CANCEL_ORDER", orderId: confirmCancelOrderId });
+            setConfirmCancelOrderId(null);
+          }}
+          onCancel={() => setConfirmCancelOrderId(null)}
+        />
+      )}
+
+      {confirmCancelItem && (
+        <ConfirmDialog
+          title="Batal Item?"
+          message={`"${confirmCancelItem.name}" akan dibuang dari order.`}
+          confirmLabel="Batal Item"
+          onConfirm={() => {
+            dispatch({ type: "CANCEL_ORDER_ITEM", orderId: confirmCancelItem.orderId, itemId: confirmCancelItem.itemId });
+            setConfirmCancelItem(null);
+          }}
+          onCancel={() => setConfirmCancelItem(null)}
+        />
+      )}
     </div>
   );
 }

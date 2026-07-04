@@ -120,8 +120,7 @@ export default function KitchenPage() {
       setTimeout(() => dispatch({ type: "SET_ORDER_STATUS", orderId: o.id, status: "served" }), 2400)
     );
     return () => timers.forEach(clearTimeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fading.map((o) => o.id).join(",")]);
+  }, [fading]);
 
   return (
     <AppShell>

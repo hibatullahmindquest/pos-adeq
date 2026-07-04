@@ -233,6 +233,25 @@ function reducer(state: State, action: Action): State {
         };
       }
 
+      // Append to existing order if cart was opened via /order?orderId=X
+      if (cart.orderId) {
+        let updatedOrders = state.orders;
+        if (dineInItems.length > 0) {
+          updatedOrders = updatedOrders.map((o) =>
+            o.id === cart.orderId
+              ? { ...o, items: [...o.items, ...dineInItems], updatedAt: now }
+              : o
+          );
+        }
+        const newTapauOrders = tapauItems.length > 0 ? [makeOrder("tapau", tapauItems)] : [];
+        return {
+          ...state,
+          orders: [...updatedOrders, ...newTapauOrders],
+          cart: emptyCart,
+          toasts: [...state.toasts, toastOf("success", "Item ditambah ke order")],
+        };
+      }
+
       if (!state.isOnline) {
         const queued: Order[] = [];
         if (dineInItems.length > 0) queued.push({ ...makeOrder("dine-in", dineInItems), offlineQueued: true });

@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 import ToastHost from "@/components/ui/ToastHost";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -24,10 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <StoreProvider>
-          {children}
-          <ToastHost />
-        </StoreProvider>
+        <ErrorBoundary>
+          <StoreProvider>
+            {children}
+            <ToastHost />
+          </StoreProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

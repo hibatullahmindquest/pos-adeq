@@ -41,7 +41,7 @@ export default function OrderTakingView() {
     <div className="flex-1 flex flex-col md:flex-row min-h-0">
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <div className="flex gap-2 px-4 sm:px-6 pt-4 pb-0 overflow-x-auto">
-          {state.categories.map((c) => (
+          {[...state.categories].sort((a, b) => a.order - b.order).map((c) => (
             <button
               key={c.id}
               onClick={() => setActiveCategory(c.id)}
