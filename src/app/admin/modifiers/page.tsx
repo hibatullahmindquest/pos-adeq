@@ -9,6 +9,8 @@ import { uid } from "@/lib/utils";
 export default function AdminModifiersPage() {
   const { state, dispatch } = useStore();
   const [selectedId, setSelectedId] = useState<string>(state.modifierGroups[0]?.id ?? "");
+  // Raw string per option while typing — avoids losing decimal mid-entry
+  const [priceInputs, setPriceInputs] = useState<Record<string, string>>({});
   const selected = state.modifierGroups.find((g) => g.id === selectedId);
 
   function addGroup() {
@@ -130,18 +132,26 @@ export default function AdminModifiersPage() {
                     className="text-[13px] font-bold text-ink bg-transparent"
                   />
                   <input
-                    value={opt.priceDelta}
-                    onChange={(e) =>
-                      updateGroup({
-                        ...selected,
-                        options: selected.options.map((o) =>
-                          o.id === opt.id ? { ...o, priceDelta: parseFloat(e.target.value) || 0 } : o
-                        ),
-                      })
-                    }
-                    type="number"
-                    step="0.5"
-                    className="text-[12.5px] text-ink-soft tab-nums bg-transparent"
+                    type="text"
+                    inputMode="decimal"
+                    value={priceInputs[opt.id] ?? String(opt.priceDelta)}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (!/^-?\d*\.?\d*$/.test(raw)) return;
+                      setPriceInputs((p) => ({ ...p, [opt.id]: raw }));
+                      const num = parseFloat(raw);
+                      if (!isNaN(num)) {
+                        updateGroup({
+                          ...selected,
+                          options: selected.options.map((o) =>
+                            o.id === opt.id ? { ...o, priceDelta: num } : o
+                          ),
+                        });
+                      }
+                    }}
+                    onBlur={() => setPriceInputs((p) => { const n = { ...p }; delete n[opt.id]; return n; })}
+                    placeholder="0"
+                    className="text-[12.5px] text-ink-soft tab-nums bg-transparent w-16"
                   />
                   <button
                     onClick={() => updateGroup({ ...selected, options: selected.options.filter((o) => o.id !== opt.id) })}

@@ -40,12 +40,14 @@ export default function CheckoutView() {
   const taxAmount =
     state.settings.taxServiceEnabled ? subtotal * (state.settings.taxServicePercent / 100) : 0;
   const grandTotal = subtotal + taxAmount;
-  const receivedNum = parseFloat(received || "0") || 0;
+  // `received` stores raw digit string (cents). "1980" → RM 19.80
+  const receivedNum = received ? parseInt(received, 10) / 100 : 0;
   const change = receivedNum - grandTotal;
 
   function pressKey(key: string) {
     if (key === "del") { setReceived((r) => r.slice(0, -1)); return; }
-    if (key === "." && received.includes(".")) return;
+    if (received.length >= 7) return; // cap at RM 99999.99
+    if (key === "00") { setReceived((r) => (r === "" ? "" : r + "00")); return; }
     setReceived((r) => r + key);
   }
 
@@ -189,7 +191,7 @@ export default function CheckoutView() {
           <>
             <div className="text-xs font-bold text-muted mb-2">Jumlah diterima</div>
             <div className="text-2xl font-extrabold text-ink bg-muted-bg rounded-xl px-4 py-4 mb-3 tab-nums">
-              {received ? formatRM(receivedNum) : "RM 0.00"}
+              {formatRM(receivedNum)}
             </div>
             <div
               className={`flex justify-between rounded-lg px-4 py-3 mb-5 ${
