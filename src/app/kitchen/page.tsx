@@ -40,7 +40,7 @@ function Ticket({ order, fading }: { order: Order; fading: boolean }) {
   }, []);
 
   const tableName = state.tables.find((t) => t.id === order.tableId)?.name ?? order.tableId;
-  const label = order.type === "dine-in" ? tableName : `Tapau · ${order.customerName}`;
+  const label = order.type === "tapau" ? `${tableName} · Tapau` : tableName;
 
   if (fading) {
     return (

@@ -93,10 +93,8 @@ export default function AdminSummaryPage() {
       .map((orders) => {
         const first = orders[0];
         const paidAt = Math.max(...orders.map((o) => o.updatedAt));
-        const label =
-          first.type === "dine-in"
-            ? state.tables.find((t) => t.id === first.tableId)?.name ?? first.tableId ?? "Meja"
-            : first.customerName ?? "Tapau";
+        const tableName = state.tables.find((t) => t.id === first.tableId)?.name ?? first.tableId ?? "Meja";
+        const label = tableName;
 
         const subtotal = orders.reduce(
           (s, o) => s + o.items.reduce((a, it) => a + lineTotal(it), 0),
@@ -117,7 +115,7 @@ export default function AdminSummaryPage() {
         return {
           paidAt,
           label,
-          type: first.type === "dine-in" ? "Dine-in" : "Tapau",
+          type: orders.every((o) => o.type === "tapau") ? "Tapau" : orders.some((o) => o.type === "tapau") ? "Dine-in + Tapau" : "Dine-in",
           items: consolidateItems(orders),
           cancelled,
           subtotal,

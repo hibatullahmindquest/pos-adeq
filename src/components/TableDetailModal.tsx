@@ -68,19 +68,23 @@ export default function TableDetailModal({ tableId, tableName, onClose }: Props)
           {activeOrders.length === 0 ? (
             <div className="text-center text-sm text-muted py-6">Tiada order aktif</div>
           ) : (
-            activeOrders.map((order, idx) => (
+            activeOrders.map((order, idx) => {
+              const isTapau = order.type === "tapau";
+              const dineInIdx = activeOrders.slice(0, idx + 1).filter((o) => o.type === "dine-in").length;
+              const roundLabel = isTapau ? "Tapau" : `Round ${dineInIdx}`;
+              return (
               <div key={order.id} className="border border-border rounded-xl overflow-hidden">
                 {/* Round header */}
                 <div className="flex items-center justify-between px-4 py-2.5 bg-muted-bg">
                   <div className="flex items-center gap-2">
-                    <span className="text-[12.5px] font-extrabold text-ink">Round {idx + 1}</span>
+                    <span className="text-[12.5px] font-extrabold text-ink">{roundLabel}</span>
                     <StatusBadge status={order.status} />
                   </div>
                   <button
                     onClick={() => dispatch({ type: "CANCEL_ORDER", orderId: order.id })}
                     className="text-[11.5px] font-bold text-status-late hover:underline px-1 py-1"
                   >
-                    Batal Round
+                    Batal
                   </button>
                 </div>
 
@@ -116,7 +120,8 @@ export default function TableDetailModal({ tableId, tableName, onClose }: Props)
                   )}
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
 

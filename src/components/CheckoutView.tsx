@@ -89,32 +89,38 @@ export default function CheckoutView() {
 
         <div className="bg-white border border-border rounded-2xl p-5">
           {tableId ? (
-            /* Table mode: items grouped by round */
-            tableOrders.map((o, idx) => (
-              <div key={o.id} className={idx > 0 ? "mt-4 pt-4 border-t border-border-light" : ""}>
-                <div className="text-[11px] font-extrabold text-muted uppercase tracking-wide mb-2.5">
-                  Round {idx + 1}
-                </div>
-                {o.items.map((it, itemIdx) => (
-                  <div
-                    key={it.id}
-                    className={`flex justify-between ${itemIdx < o.items.length - 1 ? "border-b border-border-light pb-3 mb-3" : "pb-1"}`}
-                  >
-                    <div>
-                      <div className="text-[13.5px] font-bold text-ink">
-                        {it.quantity}× {it.name}
-                      </div>
-                      {it.modifiers.length > 0 && (
-                        <div className="text-[11.5px] text-muted mt-0.5">
-                          {it.modifiers.map((m) => m.optionName).join(" · ")}
-                        </div>
-                      )}
+            /* Table mode: items grouped by round (dine-in) or tapau */
+            (() => {
+              let dineInCount = 0;
+              return tableOrders.map((o, idx) => {
+                const label = o.type === "tapau" ? "Tapau" : `Round ${++dineInCount}`;
+                return (
+                  <div key={o.id} className={idx > 0 ? "mt-4 pt-4 border-t border-border-light" : ""}>
+                    <div className="text-[11px] font-extrabold text-muted uppercase tracking-wide mb-2.5">
+                      {label}
                     </div>
-                    <div className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(lineTotal(it))}</div>
+                    {o.items.map((it, itemIdx) => (
+                      <div
+                        key={it.id}
+                        className={`flex justify-between ${itemIdx < o.items.length - 1 ? "border-b border-border-light pb-3 mb-3" : "pb-1"}`}
+                      >
+                        <div>
+                          <div className="text-[13.5px] font-bold text-ink">
+                            {it.quantity}× {it.name}
+                          </div>
+                          {it.modifiers.length > 0 && (
+                            <div className="text-[11.5px] text-muted mt-0.5">
+                              {it.modifiers.map((m) => m.optionName).join(" · ")}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(lineTotal(it))}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ))
+                );
+              });
+            })()
           ) : (
             /* Single order mode */
             singleOrder!.items.map((it, idx) => (

@@ -37,61 +37,23 @@ export default function CartPanel({ onSent }: { onSent?: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="px-4.5 pt-4.5 pb-3 border-b border-border" style={{ paddingLeft: 18, paddingRight: 18, paddingTop: 18 }}>
-        <div className="flex bg-cream rounded-lg p-[3px] mb-3">
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "SET_CART_TYPE", cartType: "dine-in" })}
-            className={`flex-1 text-center py-2 rounded-md text-[12.5px] font-bold ${
-              cart.type === "dine-in" ? "bg-chili text-white" : "text-muted"
-            }`}
+        <div className="flex items-center justify-between">
+          <span className="text-[13px] text-muted font-semibold">Meja</span>
+          <select
+            value={cart.tableId ?? ""}
+            onChange={(e) => dispatch({ type: "SET_CART_TABLE", tableId: e.target.value })}
+            className="text-[15px] font-extrabold text-ink bg-cream px-3.5 py-1.5 rounded-lg border-none"
           >
-            Dine-in
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "SET_CART_TYPE", cartType: "tapau" })}
-            className={`flex-1 text-center py-2 rounded-md text-[12.5px] font-bold ${
-              cart.type === "tapau" ? "bg-chili text-white" : "text-muted"
-            }`}
-          >
-            Tapau
-          </button>
-        </div>
-
-        {cart.type === "dine-in" ? (
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-muted font-semibold">Meja</span>
-            <select
-              value={cart.tableId ?? ""}
-              onChange={(e) => dispatch({ type: "SET_CART_TABLE", tableId: e.target.value })}
-              className="text-[15px] font-extrabold text-ink bg-cream px-3.5 py-1.5 rounded-lg border-none"
-            >
-              <option value="" disabled>
-                Pilih meja
+            <option value="" disabled>
+              Pilih meja
+            </option>
+            {state.tables.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
               </option>
-              {state.tables.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <input
-              value={cart.customerName}
-              onChange={(e) => dispatch({ type: "SET_CART_CUSTOMER", name: e.target.value, phone: cart.customerPhone })}
-              placeholder="Nama pelanggan"
-              className="border border-border rounded-lg px-3 py-2 text-[13px] font-semibold text-ink placeholder:text-faint placeholder:font-medium"
-            />
-            <input
-              value={cart.customerPhone}
-              onChange={(e) => dispatch({ type: "SET_CART_CUSTOMER", name: cart.customerName, phone: e.target.value })}
-              placeholder="No. telefon"
-              className="border border-border rounded-lg px-3 py-2 text-[13px] font-semibold text-ink placeholder:text-faint placeholder:font-medium"
-            />
-          </div>
-        )}
+            ))}
+          </select>
+        </div>
       </div>
 
       {!isOnline && (
@@ -120,13 +82,17 @@ export default function CartPanel({ onSent }: { onSent?: () => void }) {
               )}
               <div className="flex items-center justify-between mt-2">
                 <QuantityStepper qty={it.quantity} onChange={(q) => dispatch({ type: "UPDATE_CART_ITEM_QTY", itemId: it.id, qty: q })} />
-                {!isOnline && (
-                  <span className="flex items-center gap-1.5 text-[11px] font-bold text-status-cooking-dark">
-                    <span className="w-1.5 h-1.5 rounded-full bg-status-cooking-dark inline-block" />
-                    Belum sync
-                  </span>
-                )}
-                {isOnline && <span className="text-[11px] text-faint">Nota: {it.note ?? "—"}</span>}
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: "TOGGLE_CART_ITEM_TAPAU", itemId: it.id })}
+                  className={`text-[10.5px] font-extrabold px-2 py-0.5 rounded-full border transition ${
+                    it.tapau
+                      ? "bg-status-cooking-bg border-status-cooking text-status-cooking-dark"
+                      : "bg-cream border-border text-muted"
+                  }`}
+                >
+                  Tapau
+                </button>
               </div>
             </div>
           ))
