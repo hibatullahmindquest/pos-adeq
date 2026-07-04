@@ -107,6 +107,7 @@ type Action =
   | { type: "PAY_TABLE"; tableId: string; method: PaymentMethod; amountReceived?: number }
   | { type: "CANCEL_ORDER_ITEM"; orderId: string; itemId: string }
   | { type: "CANCEL_ORDER"; orderId: string }
+  | { type: "SET_ORDER_TYPE"; orderId: string; orderType: OrderType }
   | { type: "DISMISS_TOAST"; id: string }
   | { type: "ADD_TOAST"; toast: Toast }
   | { type: "ADD_MENU_ITEM"; item: MenuItem }
@@ -353,6 +354,13 @@ function reducer(state: State, action: Action): State {
         toasts: [...state.toasts, toastOf("info", "Order dibatalkan")],
       };
     }
+    case "SET_ORDER_TYPE":
+      return {
+        ...state,
+        orders: state.orders.map((o) =>
+          o.id === action.orderId ? { ...o, type: action.orderType, updatedAt: Date.now() } : o
+        ),
+      };
     case "ADD_TOAST":
       return { ...state, toasts: [...state.toasts, action.toast] };
     case "DISMISS_TOAST":

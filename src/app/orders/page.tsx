@@ -4,12 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import TableDetailModal from "@/components/TableDetailModal";
-import TapauDetailModal from "@/components/TapauDetailModal";
 import { useStore } from "@/lib/store";
 import { Order, OrderStatus, orderTotal } from "@/lib/types";
-import { elapsedLabel, formatRM } from "@/lib/utils";
+import { formatRM } from "@/lib/utils";
 import StatusBadge, { statusBorderColor } from "@/components/ui/StatusBadge";
-import EmptyState from "@/components/ui/EmptyState";
 
 const STATUS_PRIORITY: OrderStatus[] = ["new", "cooking", "ready", "served"];
 
@@ -25,17 +23,13 @@ export default function ActiveOrdersPage() {
   const { state } = useStore();
   const router = useRouter();
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
-  const [selectedTapauId, setSelectedTapauId] = useState<string | null>(null);
 
   const openOrders = state.orders.filter((o) => o.status !== "paid" && o.status !== "cancelled");
 
-  const dineIn = state.tables.map((t) => {
+  const tables = state.tables.map((t) => {
     const tableOrders = openOrders.filter((o) => o.tableId === t.id);
     return { table: t, orders: tableOrders, status: aggregateStatus(tableOrders) };
   });
-
-  // Tapau orders linked to a table appear inside TableDetailModal — exclude them here
-  const tapau = openOrders.filter((o) => o.type === "tapau" && !o.tableId);
 
   const selectedTable = selectedTableId
     ? state.tables.find((t) => t.id === selectedTableId)
@@ -54,8 +48,8 @@ export default function ActiveOrdersPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3.5 mb-8">
-          {dineIn.map(({ table, orders, status }) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3.5">
+          {tables.map(({ table, orders, status }) => (
             <button
               key={table.id}
               type="button"
@@ -77,6 +71,11 @@ export default function ActiveOrdersPage() {
                   <div>
                     <div className="text-[13px] text-muted mt-2">
                       {orders.length} order
+                      {orders.some((o) => o.type === "tapau") && (
+                        <span className="ml-1.5 text-[10.5px] font-extrabold text-status-cooking-dark bg-status-cooking-bg px-1.5 py-0.5 rounded-full">
+                          Tapau
+                        </span>
+                      )}
                     </div>
                     <div className="text-[15px] font-extrabold text-ink tab-nums mt-0.5">
                       {formatRM(orders.reduce((s, o) => s + orderTotal(o), 0))}
@@ -92,42 +91,6 @@ export default function ActiveOrdersPage() {
             </button>
           ))}
         </div>
-
-        <div className="text-base font-extrabold text-ink mb-3">Tapau</div>
-        <div className="flex flex-col gap-2">
-          {tapau.length === 0 && <EmptyState message="Tiada order tapau aktif" />}
-          {tapau.map((o) => (
-            <button
-              key={o.id}
-              type="button"
-              onClick={() => setSelectedTapauId(o.id)}
-              className="bg-white border border-border rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 hover:border-chili transition w-full text-left"
-            >
-              {/* Mobile layout */}
-              <div className="sm:hidden flex flex-col gap-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[13.5px] font-bold text-ink truncate">
-                    {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
-                  </span>
-                  <StatusBadge status={o.status} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
-                  <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
-                </div>
-              </div>
-              {/* Desktop layout */}
-              <div className="hidden sm:grid sm:grid-cols-4 sm:items-center gap-2">
-                <span className="text-[13.5px] font-bold text-ink">
-                  {o.customerName} {o.customerPhone ? `· ${o.customerPhone}` : ""}
-                </span>
-                <span><StatusBadge status={o.status} /></span>
-                <span className="text-[13.5px] font-extrabold text-ink tab-nums">{formatRM(orderTotal(o))}</span>
-                <span className="text-[11.5px] text-muted">{elapsedLabel(o.createdAt)}</span>
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
 
       {selectedTableId && selectedTable && (
@@ -135,12 +98,6 @@ export default function ActiveOrdersPage() {
           tableId={selectedTableId}
           tableName={selectedTable.name}
           onClose={() => setSelectedTableId(null)}
-        />
-      )}
-      {selectedTapauId && (
-        <TapauDetailModal
-          orderId={selectedTapauId}
-          onClose={() => setSelectedTapauId(null)}
         />
       )}
     </AppShell>

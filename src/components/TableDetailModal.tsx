@@ -80,12 +80,24 @@ export default function TableDetailModal({ tableId, tableName, onClose }: Props)
                     <span className="text-[12.5px] font-extrabold text-ink">{roundLabel}</span>
                     <StatusBadge status={order.status} />
                   </div>
-                  <button
-                    onClick={() => dispatch({ type: "CANCEL_ORDER", orderId: order.id })}
-                    className="text-[11.5px] font-bold text-status-late hover:underline px-1 py-1"
-                  >
-                    {isTapau ? "Batal Tapau" : "Batal Round"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => dispatch({ type: "SET_ORDER_TYPE", orderId: order.id, orderType: isTapau ? "dine-in" : "tapau" })}
+                      className={`text-[10.5px] font-extrabold px-2 py-0.5 rounded-full border transition ${
+                        isTapau
+                          ? "bg-status-cooking-bg border-status-cooking text-status-cooking-dark"
+                          : "border-border text-faint hover:border-muted hover:text-muted"
+                      }`}
+                    >
+                      Tapau
+                    </button>
+                    <button
+                      onClick={() => dispatch({ type: "CANCEL_ORDER", orderId: order.id })}
+                      className="text-[11.5px] font-bold text-status-late hover:underline px-1 py-1"
+                    >
+                      Batal
+                    </button>
+                  </div>
                 </div>
 
                 {/* Items */}

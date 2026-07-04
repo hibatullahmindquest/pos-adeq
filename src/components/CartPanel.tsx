@@ -37,66 +37,23 @@ export default function CartPanel({ onSent }: { onSent?: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="px-4.5 pt-4.5 pb-3 border-b border-border" style={{ paddingLeft: 18, paddingRight: 18, paddingTop: 18 }}>
-        <div className="flex bg-cream rounded-lg p-[3px] mb-3">
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "SET_CART_TYPE", cartType: "dine-in" })}
-            className={`flex-1 text-center py-2 rounded-md text-[12.5px] font-bold ${
-              cart.type === "dine-in" ? "bg-chili text-white" : "text-muted"
-            }`}
+        <div className="flex items-center justify-between">
+          <span className="text-[13px] text-muted font-semibold">Meja</span>
+          <select
+            value={cart.tableId ?? ""}
+            onChange={(e) => dispatch({ type: "SET_CART_TABLE", tableId: e.target.value })}
+            className="text-[15px] font-extrabold text-ink bg-cream px-3.5 py-1.5 rounded-lg border-none"
           >
-            Dine-in
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "SET_CART_TYPE", cartType: "tapau" })}
-            className={`flex-1 text-center py-2 rounded-md text-[12.5px] font-bold ${
-              cart.type === "tapau" ? "bg-chili text-white" : "text-muted"
-            }`}
-          >
-            Tapau
-          </button>
-        </div>
-
-        {cart.type === "dine-in" ? (
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-muted font-semibold">Meja</span>
-            <select
-              value={cart.tableId ?? ""}
-              onChange={(e) => dispatch({ type: "SET_CART_TABLE", tableId: e.target.value })}
-              className="text-[15px] font-extrabold text-ink bg-cream px-3.5 py-1.5 rounded-lg border-none"
-            >
-              <option value="" disabled>
-                Pilih meja
+            <option value="" disabled>
+              Pilih meja
+            </option>
+            {state.tables.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
               </option>
-              {state.tables.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <input
-              value={cart.customerName}
-              onChange={(e) => dispatch({ type: "SET_CART_CUSTOMER", name: e.target.value, phone: cart.customerPhone })}
-              placeholder="Nama pelanggan"
-              className="border border-border rounded-lg px-3 py-2 text-[13px] font-semibold text-ink placeholder:text-faint placeholder:font-medium"
-            />
-            <input
-              value={cart.customerPhone}
-              onChange={(e) => dispatch({ type: "SET_CART_CUSTOMER", name: cart.customerName, phone: e.target.value })}
-              placeholder="No. telefon"
-              className="border border-border rounded-lg px-3 py-2 text-[13px] font-semibold text-ink placeholder:text-faint placeholder:font-medium"
-            />
-            {cart.tableId && (
-              <div className="text-[11.5px] font-semibold text-muted bg-cream rounded-lg px-3 py-1.5">
-                Tapau ini akan dicantum dengan {state.tables.find((t) => t.id === cart.tableId)?.name ?? "meja"}
-              </div>
-            )}
-          </div>
-        )}
+            ))}
+          </select>
+        </div>
       </div>
 
       {!isOnline && (
